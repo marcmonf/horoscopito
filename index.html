@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HOROSCOPITO – Tu Horóscopo Diario | Astrología Premium</title>
+<meta name="description" content="Descubre tu horóscopo diario con HOROSCOPITO. Astrología premium para los 12 signos del zodiaco: amor, trabajo, dinero y salud. Consulta tu destino hoy." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a051f;
+    --bg2: #0e0828;
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.15);
+    --gold: #facc15;
+    --gold-dim: rgba(250,204,21,0.12);
+    --cyan: #67e8f9;
+    --cyan-dim: rgba(103,232,249,0.1);
+    --white: #ffffff;
+    --white70: rgba(255,255,255,0.7);
+    --white40: rgba(255,255,255,0.4);
+    --white10: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.08);
+    --border-gold: rgba(250,204,21,0.25);
+    --border-purple: rgba(167,139,250,0.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── CANVAS ── */
+  #starCanvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── NEBULA BG ── */
+  .nebula {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 50% at 20% 30%, rgba(88,28,135,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 80% 70%, rgba(30,58,138,0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 55% 20%, rgba(103,232,249,0.05) 0%, transparent 60%);
+  }
+
+  /* ── SITE WRAPPER ── */
+  .site { position: relative; z-index: 1; }
+
+  /* ── NAVIGATION ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 2rem;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: linear-gradient(to bottom, rgba(10,5,31,0.95), rgba(10,5,31,0.6));
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .nav-logo .star-icon {
+    font-size: 1.4rem;
+    color: var(--gold);
+    line-height: 1;
+    animation: spin-slow 20s linear infinite;
+  }
+  .nav-logo .brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    background: linear-gradient(135deg, var(--white) 40%, var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.05rem;
+    list-style: none;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a {
+    display: block;
+    padding: 0.35rem 0.32rem;
+    font-size: 0.62rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--white70);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 1px;
+    background: var(--gold);
+    transition: width 0.25s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 70%; }
+  .nav-links .sep {
+    color: var(--white40);
+    font-size: 0.55rem;
+    padding: 0 0.1rem;
+    pointer-events: none;
+  }
+
+  .tarot-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-gold);
+    border-radius: 100px;
+    background: var(--gold-dim);
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+  }
+  .tarot-btn:hover {
+    background: rgba(250,204,21,0.2);
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(250,204,21,0.15);
+  }
+
+  /* Hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px;
+    background: none;
+    border: none;
+  }
+  .hamburger span {
+    display: block;
+    width: 22px;
+    height: 1px;
+    background: var(--white70);
+    transition: all 0.3s;
+  }
+
+  /* Mobile menu */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 70px; left: 0; right: 0;
+    z-index: 99;
+    background: rgba(10,5,31,0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    color: var(--white70);
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s;
+  }
+  .mobile-menu a:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 2rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-date {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.2s forwards;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    font-style: italic;
+    color: var(--white40);
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.4s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 6.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    max-width: 900px;
+    opacity: 0;
+    animation: fade-up 0.9s 0.6s forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--purple), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    font-weight: 300;
+    color: var(--white70);
+    margin-top: 1.5rem;
+    max-width: 600px;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fade-up 0.9s 0.8s forwards;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 1rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fade-up 0.9s 1s forwards;
+  }
+
+  .btn-primary {
+    padding: 1rem 2.2rem;
+    background: linear-gradient(135deg, var(--purple), #7c3aed);
+    border: none;
+    border-radius: 100px;
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(167,139,250,0.3);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 50px rgba(167,139,250,0.45);
+  }
+
+  .btn-outline {
+    padding: 1rem 2.2rem;
+    background: var(--white10);
+    border: 1px solid var(--border-purple);
+    border-radius: 100px;
+    color: var(--white70);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+  }
+  .btn-outline:hover {
+    background: var(--purple-dim);
+    border-color: var(--purple);
+    color: var(--white);
+    transform: translateY(-2px);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--white40);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fade-up 1s 1.4s forwards;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--white40), transparent);
+    animation: scroll-pulse 2s ease-in-out infinite;
+  }
+
+  /* ── SECTIONS ── */
+  section { position: relative; z-index: 1; }
+
+  .section-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+  }
+  .section-title em {
+    font-style: italic;
+    color: var(--purple);
+  }
+
+  /* ── ZODIAC GRID ── */
+  .signs-section {
+    padding: 6rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .signs-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .signs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .sign-card {
+    position: relative;
+    padding: 2rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--white10);
+    backdrop-filter: blur(12px);
+    text-decoration: none;
+    color: inherit;
+    text-align: center;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+    cursor: pointer;
+    display: block;
+  }
+  .sign-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--card-glow, radial-gradient(circle at 50% 0%, rgba(167,139,250,0.1), transparent 70%));
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .sign-card:hover {
+    border-color: var(--card-accent, var(--purple));
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px var(--card-shadow, rgba(167,139,250,0.15));
+  }
+  .sign-card:hover::before { opacity: 1; }
+
+  .sign-symbol {
+    font-size: 2.8rem;
+    line-height: 1;
+    margin-bottom: 0.75rem;
+    display: block;
+    transition: transform 0.35s;
+  }
+  .sign-card:hover .sign-symbol { transform: scale(1.15); }
+
+  .sign-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .sign-dates {
+    font-size: 0.7rem;
+    color: var(--white40);
+    letter-spacing: 0.1em;
+  }
+
+  .sign-card-arrow {
+    position: absolute;
+    bottom: 1rem;
+    right: 1.2rem;
+    font-size: 0.75rem;
+    color: var(--white40);
+    transition: all 0.25s;
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  .sign-card:hover .sign-card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ── SEO SECTION ── */
+  .seo-section {
+    padding: 6rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    border-top: 1px solid var(--border);
+  }
+
+  .seo-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    line-height: 1.25;
+  }
+  .seo-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin: 2.5rem 0 1rem;
+    color: var(--purple);
+  }
+  .seo-section p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    line-height: 1.85;
+    color: var(--white70);
+    text-align: justify;
+    margin-bottom: 1.2rem;
+  }
+  .seo-section strong { color: var(--white); font-weight: 500; }
+
+  /* ── DIVIDER ── */
+  .cosmic-divider {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 2rem auto;
+    max-width: 400px;
+    justify-content: center;
+  }
+  .cosmic-divider span {
+    color: var(--gold);
+    font-size: 1rem;
+  }
+  .cosmic-divider::before, .cosmic-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border-gold));
+  }
+  .cosmic-divider::after {
+    background: linear-gradient(to left, transparent, var(--border-gold));
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    background: linear-gradient(135deg, var(--white) 40%, var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+  .footer-text {
+    font-size: 0.75rem;
+    color: var(--white40);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+  .footer-signs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    margin-bottom: 2rem;
+  }
+  .footer-signs a {
+    font-size: 0.7rem;
+    color: var(--white40);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .footer-signs a:hover { color: var(--gold); }
+  .footer-copy {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.1em;
+  }
+  .footer-legal {
+    margin-top: 2rem;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.05em;
+  }
+  .footer-legal a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-legal a:hover {
+    color: var(--white40);
+  }
+
+  /* ── TAROT MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(5,2,15,0.85);
+    backdrop-filter: blur(16px);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    position: relative;
+    background: linear-gradient(135deg, rgba(14,8,40,0.98), rgba(25,8,60,0.98));
+    border: 1px solid var(--border-purple);
+    border-radius: 24px;
+    padding: 3rem;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 80px rgba(167,139,250,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+    animation: modal-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1.25rem; right: 1.25rem;
+    background: none;
+    border: none;
+    color: var(--white40);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.25rem;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--white); }
+
+  .modal-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--white40);
+    font-style: italic;
+    margin-bottom: 2rem;
+  }
+
+  .tarot-cards {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .tarot-card-item {
+    width: 90px;
+    height: 140px;
+    border: 1px solid var(--border-purple);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(167,139,250,0.1), rgba(103,232,249,0.05));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .tarot-card-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--purple), var(--cyan));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .tarot-card-item.revealed::before { opacity: 0.15; }
+  .tarot-card-item .card-symbol {
+    font-size: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .tarot-card-item .card-name {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--white70);
+    text-align: center;
+    padding: 0 0.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .tarot-card-item:hover {
+    border-color: var(--purple);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(167,139,250,0.2);
+  }
+
+  .modal-message {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--white70);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    min-height: 3rem;
+    font-style: italic;
+  }
+
+  /* ── FEATURE STRIP ── */
+  .features {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    max-width: 900px;
+    margin: 0 auto 2rem;
+  }
+  .feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  .feature-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .feature-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white40);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin-slow {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes scroll-pulse {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50% { opacity: 0.8; transform: scaleY(1.1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* Reveal on scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+  }
+  @media (max-width: 600px) {
+    .signs-grid { grid-template-columns: repeat(2, 1fr); }
+    .tarot-cards { gap: 0.75rem; }
+    .tarot-card-item { width: 75px; height: 115px; }
+    .modal { padding: 2rem 1.5rem; }
+    .features { gap: 2rem; }
+  }
+  /* ── COOKIE BANNER ── */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(10,5,31,0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+  font-size: 0.85rem;
+  color: var(--white70);
+}
+.cookie-text {
+  flex: 1;
+  min-width: 200px;
+}
+.cookie-text a {
+  color: var(--gold);
+  text-decoration: underline;
+}
+.cookie-btn {
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  padding: 0.65rem 1.8rem;
+  border-radius: 100px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cookie-btn:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+</style>
+</head>
+<body>
+
+<!-- ── BACKGROUND ── -->
+<canvas id="starCanvas"></canvas>
+<div class="nebula"></div>
+
+<!-- ── NAVIGATION ── -->
+<nav id="navbar">
+  <a href="index.html" class="nav-logo" aria-label="Horoscopito inicio">
+    <span class="star-icon">✧</span>
+    <span class="brand">HOROSCOPITO</span>
+  </a>
+
+  <ul class="nav-links" role="list">
+    <li><a href="index.html">Inicio</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="aries.html">Aries</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="tauro.html">Tauro</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="geminis.html">Géminis</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="cancer.html">Cáncer</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="leo.html">Leo</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="virgo.html">Virgo</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="libra.html">Libra</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="escorpio.html">Escorpio</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="sagitario.html">Sagitario</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="capricornio.html">Capricornio</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="acuario.html">Acuario</a></li>
+    <li><span class="sep">·</span></li>
+    <li><a href="piscis.html">Piscis</a></li>
+  </ul>
+
+  <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0;">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+    <button class="tarot-btn" id="tarotBtn">
+      <span>🃏</span> Tarot del día
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">✦ Inicio</a>
+  <a href="aries.html">♈ Aries</a>
+  <a href="tauro.html">♉ Tauro</a>
+  <a href="geminis.html">♊ Géminis</a>
+  <a href="cancer.html">♋ Cáncer</a>
+  <a href="leo.html">♌ Leo</a>
+  <a href="virgo.html">♍ Virgo</a>
+  <a href="libra.html">♎ Libra</a>
+  <a href="escorpio.html">♏ Escorpio</a>
+  <a href="sagitario.html">♐ Sagitario</a>
+  <a href="capricornio.html">♑ Capricornio</a>
+  <a href="acuario.html">♒ Acuario</a>
+  <a href="piscis.html">♓ Piscis</a>
+</div>
+
+<!-- ── SITE CONTENT ── -->
+<div class="site">
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="hero-date" id="heroDate">HOY • 22 DE ABRIL 2026</p>
+    <p class="hero-eyebrow">Portal de Astrología Premium</p>
+    <h1 class="hero-title">Tu destino está<br>escrito en <em>las estrellas</em></h1>
+    <p class="hero-sub">Descubre lo que el cosmos tiene reservado para ti hoy. Horóscopo diario, cartas de tarot y guía astral para los 12 signos.</p>
+    <div class="hero-ctas">
+      <a href="#signos" class="btn-primary">✦ Explorar los 12 signos</a>
+      <button class="btn-outline" id="surpriseBtn">⟡ Sorpréndeme con una lectura</button>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Desplaza</span>
+    </div>
+  </section>
+
+  <!-- FEATURES STRIP -->
+  <div class="features reveal">
+    <div class="feature">
+      <div class="feature-icon">♈</div>
+      <div class="feature-label">12 signos del zodiaco</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🌙</div>
+      <div class="feature-label">Actualizado cada día</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">✦</div>
+      <div class="feature-label">Amor · Trabajo · Salud</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🃏</div>
+      <div class="feature-label">Tarot del día</div>
+    </div>
+  </div>
+
+  <!-- ZODIAC GRID -->
+  <section class="signs-section" id="signos">
+    <div class="signs-header reveal">
+      <p class="section-label">Los doce signos</p>
+      <h2 class="section-title">¿Cuál es tu <em>destino</em> hoy?</h2>
+    </div>
+    <div class="signs-grid reveal" id="signsGrid"></div>
+  </section>
+
+  <!-- COSMIC DIVIDER -->
+  <div class="cosmic-divider reveal">
+    <span>✦</span>
+  </div>
+
+  <!-- SEO SECTION -->
+  <section class="seo-section reveal">
+    <h2>Horóscopo Diario: La Guía Astral Más Completa para los 12 Signos del Zodiaco</h2>
+
+    <p>Bienvenido a <strong>HOROSCOPITO</strong>, el portal de astrología premium donde cada día las estrellas revelan su mensaje más profundo. En un mundo en constante movimiento, la sabiduría ancestral del zodiaco ofrece una brújula interior de incalculable valor. Nuestro <strong>horóscopo diario</strong> es mucho más que una predicción: es una invitación a conocerte mejor, a tomar decisiones con mayor claridad y a vivir en armonía con los ritmos cósmicos que nos rodean.</p>
+
+    <p>La astrología lleva miles de años acompañando a la humanidad. Desde las antiguas civilizaciones de Mesopotamia y Egipto hasta los astrólogos del Renacimiento, el estudio de los planetas y sus influencias ha sido parte fundamental de la cultura humana. Hoy, en HOROSCOPITO, fusionamos esa tradición milenaria con una experiencia digital moderna, accesible y visualmente inmersiva, para que puedas consultar tu <strong>horóscopo de hoy</strong> en cualquier momento y desde cualquier lugar.</p>
+
+    <h3>♈ Horóscopo de Aries Hoy</h3>
+    <p><strong>Aries</strong> (21 de marzo – 19 de abril) es el primer signo del zodiaco, gobernado por Marte, el planeta de la acción y la energía. Los nativos de Aries son conocidos por su coraje, su determinación y su espíritu pionero. Si eres Aries, el <strong>horóscopo de Aries hoy</strong> te guiará en tus decisiones más importantes, desde el terreno del amor y las relaciones hasta los desafíos profesionales y financieros. En HOROSCOPITO encontrarás predicciones detalladas, compatibilidades y consejos personalizados que te ayudarán a aprovechar al máximo la energía marciana de cada jornada.</p>
+
+    <h3>♉ Tauro, ♊ Géminis y los Signos de Primavera</h3>
+    <p><strong>Tauro</strong> (20 de abril – 20 de mayo), guiado por Venus, representa la estabilidad, el placer y la conexión con lo material. Nuestro <strong>horóscopo de Tauro</strong> te ayuda a encontrar el equilibrio entre la seguridad que deseas y las oportunidades que el universo te ofrece cada día. <strong>Géminis</strong> (21 de mayo – 20 de junio), regido por Mercurio, es el signo de la comunicación, la dualidad y el ingenio. El <strong>horóscopo de Géminis hoy</strong> te dará claves para navegar la complejidad de tus pensamientos y relaciones con mayor fluidez y creatividad.</p>
+
+    <h3>🌊 Los Signos de Agua: Cáncer, Escorpio y Piscis</h3>
+    <p>Los signos de agua son los más intuitivos y emocionales del zodiaco. <strong>Cáncer</strong> (21 de junio – 22 de julio), gobernado por la Luna, tiene una profunda conexión con el hogar, la familia y la memoria. <strong>Escorpio</strong> (23 de octubre – 21 de noviembre), con la intensidad de Plutón, explora las profundidades del alma y los misterios de la existencia. <strong>Piscis</strong> (19 de febrero – 20 de marzo), regido por Neptuno, vive entre el sueño y la realidad, con una sensibilidad artística y espiritual sin igual. Para estos tres signos, el <strong>horóscopo diario</strong> en HOROSCOPITO es especialmente revelador, ya que la influencia lunar y planetaria afecta directamente su vida emocional y creativa.</p>
+
+    <h3>🔥 Los Signos de Fuego: Leo, Sagitario y Aries</h3>
+    <p>La energía de los signos de fuego es expansiva, apasionada y visionaria. <strong>Leo</strong> (23 de julio – 22 de agosto), el signo del Sol, nació para brillar y liderar con generosidad. <strong>Sagitario</strong> (22 de noviembre – 21 de diciembre), arquero guiado por Júpiter, busca la verdad, la aventura y el conocimiento sin fronteras. Junto con Aries, forman la trinidad ígnea del zodiaco. En nuestro portal, el <strong>horóscopo de Leo</strong>, el <strong>horóscopo de Sagitario</strong> y el de Aries reciben un tratamiento especial, con énfasis en las oportunidades de crecimiento, liderazgo y expansión que el cosmos ofrece cada día.</p>
+
+    <h3>🌿 Los Signos de Tierra: Tauro, Virgo y Capricornio</h3>
+    <p>Prácticos, metódicos y orientados a los resultados, los signos de tierra construyen el mundo que otros imaginan. <strong>Virgo</strong> (23 de agosto – 22 de septiembre), gobernado por Mercurio, tiene una mente analítica y un profundo deseo de servicio. <strong>Capricornio</strong> (22 de diciembre – 19 de enero), bajo la influencia de Saturno, es el estratega del zodiaco, capaz de escalar las cimas más altas con paciencia y disciplina. El <strong>horóscopo diario de Virgo</strong> y el de <strong>Capricornio</strong> en HOROSCOPITO ofrecen orientación práctica para optimizar el trabajo, las finanzas y la salud.</p>
+
+    <h3>💨 Los Signos de Aire: Géminis, Libra y Acuario</h3>
+    <p>Intelectuales, sociales y orientados hacia el futuro, los signos de aire son los grandes pensadores y comunicadores del zodiaco. <strong>Libra</strong> (23 de septiembre – 22 de octubre), el signo de la balanza gobernado por Venus, busca el equilibrio, la justicia y la armonía en todas sus relaciones. <strong>Acuario</strong> (20 de enero – 18 de febrero), revolucionario y visionario bajo la influencia de Urano, se adelanta a su tiempo con ideas que transforman el mundo. El <strong>horóscopo de Libra</strong> y el <strong>horóscopo de Acuario</strong> en nuestro portal te ofrecen perspectivas únicas para conectar con las tendencias del cosmos y la humanidad.</p>
+
+    <h3>¿Por Qué Consultar tu Horóscopo Diario?</h3>
+    <p>Consultar el <strong>horóscopo diario</strong> no implica abandonar tu libre albedrío ni creer ciegamente en el determinismo. Al contrario: la astrología es una herramienta de autoconocimiento que te invita a reflexionar sobre tus patrones, tus fortalezas y tus áreas de crecimiento. Cuando lees tu horóscopo de hoy en HOROSCOPITO, accedes a un lenguaje simbólico que ha resonado con millones de personas a lo largo de la historia. Las posiciones de los planetas en el momento de tu nacimiento — tu <em>carta natal</em> — y sus movimientos actuales en tránsito crean un diálogo constante entre el cosmos y tu vida cotidiana.</p>
+
+    <p>En HOROSCOPITO nos comprometemos a ofrecerte <strong>predicciones diarias de alta calidad</strong> para los 12 signos del zodiaco, con secciones detalladas de amor, trabajo, dinero y salud. También encontrarás lecturas de tarot, análisis de la luna llena y nueva, y artículos en profundidad sobre astrología. Nuestro objetivo es ser el portal de referencia en español para todos los apasionados de la astrología, desde principiantes hasta expertos. Bienvenido a tu viaje cósmico. <strong>Las estrellas te esperan.</strong></p>
+  </section>
+
+  <!-- FOOTER -->
+<footer>
+  <div class="footer-logo">✧ HOROSCOPITO</div>
+  <p class="footer-text">Portal de Astrología Premium · Actualizado cada día</p>
+  <div class="footer-signs">
+    <a href="aries.html">Aries</a>
+    <a href="tauro.html">Tauro</a>
+    <a href="geminis.html">Géminis</a>
+    <a href="cancer.html">Cáncer</a>
+    <a href="leo.html">Leo</a>
+    <a href="virgo.html">Virgo</a>
+    <a href="libra.html">Libra</a>
+    <a href="escorpio.html">Escorpio</a>
+    <a href="sagitario.html">Sagitario</a>
+    <a href="capricornio.html">Capricornio</a>
+    <a href="acuario.html">Acuario</a>
+    <a href="piscis.html">Piscis</a>
+  </div>
+  <p class="footer-copy">© 2026 HOROSCOPITO · Todos los derechos reservados · Las predicciones son orientativas</p>
+
+  <!-- ENLACES LEGALES (nuevo) -->
+  <div class="footer-legal">
+    <a href="aviso-legal.html">Aviso Legal</a> • 
+    <a href="politica-privacidad.html">Política de Privacidad</a> • 
+    <a href="politica-cookies.html">Política de Cookies</a>
+  </div>
+</footer>
+
+</div><!-- /site -->
+
+<!-- ── TAROT MODAL ── -->
+<div class="modal-overlay" id="tarotModal" role="dialog" aria-modal="true" aria-label="Tarot del día">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Cerrar">×</button>
+    <div class="modal-icon">🌙</div>
+    <h2 class="modal-title">Tarot del Día</h2>
+    <p class="modal-subtitle">Elige una carta para descubrir tu mensaje</p>
+    <div class="tarot-cards" id="tarotCards">
+      <div class="tarot-card-item" data-card="0">
+        <span class="card-symbol">✦</span>
+        <span class="card-name">Elige</span>
+      </div>
+      <div class="tarot-card-item" data-card="1">
+        <span class="card-symbol">✦</span>
+        <span class="card-name">Elige</span>
+      </div>
+      <div class="tarot-card-item" data-card="2">
+        <span class="card-symbol">✦</span>
+        <span class="card-name">Elige</span>
+      </div>
+    </div>
+    <p class="modal-message" id="tarotMessage">Toca una carta para revelar tu guía de hoy...</p>
+    <a href="#signos" class="btn-primary" style="display:inline-flex;margin:0 auto;" onclick="document.getElementById('tarotModal').classList.remove('open')">
+      Ver mi signo ✦
+    </a>
+  </div>
+</div>
+
+<!-- ── SCRIPTS ── -->
+<script>
+/* ── STAR CANVAS ── */
+(function() {
+  const canvas = document.getElementById('starCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [], mouse = { x: 0, y: 0 };
+
+  const STAR_COUNT = 220;
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function createStars() {
+    stars = [];
+    for (let i = 0; i < STAR_COUNT; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.4 + 0.2,
+        alpha: Math.random() * 0.7 + 0.1,
+        speed: Math.random() * 0.3 + 0.05,
+        drift: (Math.random() - 0.5) * 0.15,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        twinkleOffset: Math.random() * Math.PI * 2,
+        color: Math.random() > 0.85 ? '#a78bfa' : Math.random() > 0.7 ? '#67e8f9' : '#ffffff'
+      });
+    }
+  }
+
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    t += 0.012;
+    stars.forEach(s => {
+      const twinkle = Math.sin(t * s.twinkleSpeed * 60 + s.twinkleOffset) * 0.3 + 0.7;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = s.alpha * twinkle;
+      ctx.fill();
+      // Slow drift
+      s.x += s.drift;
+      s.y -= s.speed * 0.1;
+      if (s.y < -2) { s.y = H + 2; s.x = Math.random() * W; }
+      if (s.x < 0) s.x = W;
+      if (s.x > W) s.x = 0;
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); createStars(); });
+  resize();
+  createStars();
+  draw();
+})();
+
+/* ── ZODIAC DATA ── */
+const SIGNS = [
+  { name: 'Aries',       symbol: '♈', dates: '21 Mar – 19 Abr', file: 'aries.html',       accent: '#f87171', shadow: 'rgba(248,113,113,0.2)' },
+  { name: 'Tauro',       symbol: '♉', dates: '20 Abr – 20 May', file: 'tauro.html',       accent: '#34d399', shadow: 'rgba(52,211,153,0.2)' },
+  { name: 'Géminis',     symbol: '♊', dates: '21 May – 20 Jun', file: 'geminis.html',     accent: '#facc15', shadow: 'rgba(250,204,21,0.2)' },
+  { name: 'Cáncer',      symbol: '♋', dates: '21 Jun – 22 Jul', file: 'cancer.html',      accent: '#67e8f9', shadow: 'rgba(103,232,249,0.2)' },
+  { name: 'Leo',         symbol: '♌', dates: '23 Jul – 22 Ago', file: 'leo.html',         accent: '#fb923c', shadow: 'rgba(251,146,60,0.2)' },
+  { name: 'Virgo',       symbol: '♍', dates: '23 Ago – 22 Sep', file: 'virgo.html',       accent: '#86efac', shadow: 'rgba(134,239,172,0.2)' },
+  { name: 'Libra',       symbol: '♎', dates: '23 Sep – 22 Oct', file: 'libra.html',       accent: '#f9a8d4', shadow: 'rgba(249,168,212,0.2)' },
+  { name: 'Escorpio',    symbol: '♏', dates: '23 Oct – 21 Nov', file: 'escorpio.html',    accent: '#c084fc', shadow: 'rgba(192,132,252,0.2)' },
+  { name: 'Sagitario',   symbol: '♐', dates: '22 Nov – 21 Dic', file: 'sagitario.html',   accent: '#a78bfa', shadow: 'rgba(167,139,250,0.2)' },
+  { name: 'Capricornio', symbol: '♑', dates: '22 Dic – 19 Ene', file: 'capricornio.html', accent: '#94a3b8', shadow: 'rgba(148,163,184,0.2)' },
+  { name: 'Acuario',     symbol: '♒', dates: '20 Ene – 18 Feb', file: 'acuario.html',     accent: '#38bdf8', shadow: 'rgba(56,189,248,0.2)' },
+  { name: 'Piscis',      symbol: '♓', dates: '19 Feb – 20 Mar', file: 'piscis.html',      accent: '#818cf8', shadow: 'rgba(129,140,248,0.2)' },
+];
+
+/* Render sign cards */
+const grid = document.getElementById('signsGrid');
+SIGNS.forEach(s => {
+  const a = document.createElement('a');
+  a.href = s.file;
+  a.className = 'sign-card';
+  a.style.setProperty('--card-accent', s.accent);
+  a.style.setProperty('--card-shadow', s.shadow);
+  a.style.setProperty('--card-glow', `radial-gradient(circle at 50% 0%, ${s.shadow.replace('0.2','0.15')}, transparent 70%)`);
+  a.innerHTML = `
+    <span class="sign-symbol">${s.symbol}</span>
+    <div class="sign-name">${s.name}</div>
+    <div class="sign-dates">${s.dates}</div>
+    <span class="sign-card-arrow">→</span>
+  `;
+  grid.appendChild(a);
+});
+
+/* ── TAROT DATA ── */
+const TAROT_CARDS = [
+  { symbol: '☀️', name: 'El Sol', msg: 'La claridad llega a tu vida. Hoy el Sol ilumina tus mejores cualidades y te invita a brillar sin reservas. Confía en tu luz interior.' },
+  { symbol: '🌙', name: 'La Luna', msg: 'Los misterios del inconsciente afloran. Presta atención a tus sueños y a esa voz interior que pocas veces escuchas. La intuición es tu guía.' },
+  { symbol: '⭐', name: 'La Estrella', msg: 'Esperanza y renovación. El universo conspira a tu favor. Mantén la fe aunque el camino parezca oscuro: la estrella siempre guía al navegante.' },
+  { symbol: '⚡', name: 'La Torre', msg: 'Un cambio inesperado sacude tus cimientos. Lo que cae ya no te servía. Sobre las ruinas del pasado construirás algo más auténtico y duradero.' },
+  { symbol: '🌍', name: 'El Mundo', msg: 'Ciclo completado. El cosmos celebra tus logros. Estás listo para un nuevo capítulo que promete expansión, viajes y conexiones transformadoras.' },
+  { symbol: '🔮', name: 'La Sacerdotisa', msg: 'El conocimiento oculto busca revelarse ante ti. Dedica tiempo hoy a la contemplación, la meditación y el silencio. Las respuestas están dentro.' },
+  { symbol: '⚖️', name: 'La Justicia', msg: 'El karma actúa. Lo que has sembrado regresa a ti. Actúa con integridad hoy: cada decisión tiene consecuencias que se amplifican bajo esta energía.' },
+  { symbol: '🦋', name: 'El Loco', msg: 'Un nuevo comienzo te llama. Suelta el miedo al ridículo y da ese salto. La magia sucede cuando confías en el universo sin necesitar garantías.' },
+  { symbol: '👑', name: 'El Emperador', msg: 'El poder y la estructura son tus aliados hoy. Toma decisiones con firmeza y establece límites claros. Tu autoridad natural inspira a quienes te rodean.' },
+];
+
+/* ── TAROT MODAL ── */
+const tarotModal = document.getElementById('tarotModal');
+const tarotMsg = document.getElementById('tarotMessage');
+const tarotCardEls = document.querySelectorAll('.tarot-card-item');
+let revealedCards = new Set();
+
+function openTarot() {
+  // Shuffle 3 random cards
+  const shuffled = [...TAROT_CARDS].sort(() => Math.random() - 0.5).slice(0, 3);
+  tarotCardEls.forEach((el, i) => {
+    el.dataset.idx = i;
+    el.dataset.card = JSON.stringify(shuffled[i]);
+    el.classList.remove('revealed');
+    el.querySelector('.card-symbol').textContent = '✦';
+    el.querySelector('.card-name').textContent = 'Elige';
+  });
+  revealedCards.clear();
+  tarotMsg.textContent = 'Toca una carta para revelar tu guía de hoy...';
+  tarotModal.classList.add('open');
+}
+
+tarotCardEls.forEach(el => {
+  el.addEventListener('click', function() {
+    if (this.classList.contains('revealed')) return;
+    const card = JSON.parse(this.dataset.card);
+    this.classList.add('revealed');
+    this.querySelector('.card-symbol').textContent = card.symbol;
+    this.querySelector('.card-name').textContent = card.name;
+    tarotMsg.textContent = `"${card.msg}"`;
+    revealedCards.add(this.dataset.idx);
+  });
+});
+
+document.getElementById('tarotBtn').addEventListener('click', openTarot);
+document.getElementById('modalClose').addEventListener('click', () => tarotModal.classList.remove('open'));
+tarotModal.addEventListener('click', e => { if (e.target === tarotModal) tarotModal.classList.remove('open'); });
+
+/* ── SURPRISE BUTTON ── */
+document.getElementById('surpriseBtn').addEventListener('click', () => {
+  const rand = SIGNS[Math.floor(Math.random() * SIGNS.length)];
+  window.location.href = rand.file;
+});
+
+/* ── HAMBURGER ── */
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburgerBtn.addEventListener('click', () => {
+  mobileMenu.classList.toggle('open');
+});
+
+/* ── SCROLL REVEAL ── */
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      e.target.style.transitionDelay = (i * 0.05) + 's';
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+reveals.forEach(r => observer.observe(r));
+
+/* ── DATE ── */
+(function() {
+  const months = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const now = new Date();
+  document.getElementById('heroDate').textContent = `HOY • ${now.getDate()} DE ${months[now.getMonth()]} ${now.getFullYear()}`;
+})();
+/* ── COOKIE BANNER ── */
+const cookieBanner = document.getElementById('cookieBanner');
+const acceptBtn = document.getElementById('acceptCookies');
+
+if (localStorage.getItem('cookiesAccepted') !== 'true') {
+  cookieBanner.style.display = 'flex';
+}
+
+acceptBtn.addEventListener('click', () => {
+  localStorage.setItem('cookiesAccepted', 'true');
+  cookieBanner.style.display = 'none';
+});
+</script>
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="cookieBanner">
+  <div class="cookie-text">
+    Utilizamos cookies para mejorar tu experiencia. 
+    Al continuar navegando aceptas nuestra 
+    <a href="politica-cookies.html">Política de Cookies</a>.
+  </div>
+  <button class="cookie-btn" id="acceptCookies">Aceptar</button>
+</div>
+</body>
+</html>
