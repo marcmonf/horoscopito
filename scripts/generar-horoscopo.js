@@ -57,7 +57,7 @@ Reglas OBLIGATORIAS:
   - Trabajo (2-3 frases)
   - Dinero (2-3 frases)
   - Salud (2-3 frases)
-- Al final, genera 4 puntuaciones coherentes (del 1 al 10) según el tono general:
+- Al final genera 4 puntuaciones coherentes (1-10) según el tono del texto:
   - Amor: X/10
   - Trabajo: X/10
   - Dinero: X/10
@@ -116,12 +116,23 @@ async function actualizarArchivo(signo, nuevoTexto) {
   if (dineroMatch) content = content.replace(regexDinero, `<div class="area-title">Dinero</div>\n<div class="area-text">${dineroMatch[1].trim()}</div>`);
   if (saludMatch) content = content.replace(regexSalud, `<div class="area-title">Salud</div>\n<div class="area-text">${saludMatch[1].trim()}</div>`);
 
+  // 3. Barras de energía (coherentes)
+  const amorP = nuevoTexto.match(/Amor:\s*(\d+)\/10/i);
+  const trabajoP = nuevoTexto.match(/Trabajo:\s*(\d+)\/10/i);
+  const dineroP = nuevoTexto.match(/Dinero:\s*(\d+)\/10/i);
+  const saludP = nuevoTexto.match(/Salud:\s*(\d+)\/10/i);
+
+  if (amorP) content = content.replace(/data-width="[^"]*"/, `data-width="${amorP[1]}0%"`);
+  if (trabajoP) content = content.replace(/data-width="[^"]*"/, `data-width="${trabajoP[1]}0%"`);
+  if (dineroP) content = content.replace(/data-width="[^"]*"/, `data-width="${dineroP[1]}0%"`);
+  if (saludP) content = content.replace(/data-width="[^"]*"/, `data-width="${saludP[1]}0%"`);
+
   fs.writeFileSync(filePath, content, 'utf8');
   console.log(`✅ Actualizado completamente: ${signo.file}`);
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación completa (horóscopo + cajitas + energía del día)...\n');
+  console.log('🌌 Iniciando generación completa (horóscopo + cajitas + barras de energía)...\n');
  
   for (const signo of SIGNOS) {
     try {
