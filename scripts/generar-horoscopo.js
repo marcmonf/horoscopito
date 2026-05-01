@@ -30,7 +30,7 @@ async function generarHoroscopo(signo) {
     temperature: 0.65,
     messages: [{
       role: "user",
-      content: `Escribe el horóscopo de hoy para ${signo.nombre} exactamente en el mismo estilo elegante, suave y refinado que el ejemplo de Leo.
+      content: `Escribe el horóscopo de hoy para ${signo.nombre} exactamente en el mismo estilo elegante y suave que el ejemplo de Leo.
 
 Ejemplo de Leo:
 "El Sol, tu regente cósmico, te otorga hoy una presencia magnética que es imposible ignorar..."
@@ -40,8 +40,7 @@ Reglas OBLIGATORIAS:
 - Escribe entre 380 y 480 palabras.
 - Párrafos cortos y bien espaciados.
 - Nunca uses emojis, markdown ni negritas.
-- El texto debe ir envuelto exactamente así: <p class="horoscope-text">...texto con <br><br> entre párrafos...</p>
-- Mantén la misma elegancia y fluidez que Leo.`
+- Devuelve SOLO el texto puro (sin etiquetas HTML).`
     }]
   });
 
@@ -52,7 +51,7 @@ async function actualizarArchivo(signo, nuevoTexto) {
   const filePath = path.join(__dirname, '..', signo.file);
   let content = fs.readFileSync(filePath, 'utf8');
 
-  // Reemplazo muy seguro: siempre mantiene la etiqueta <p class="horoscope-text">
+  // Reemplazo ULTRA SEGURO: siempre fuerza la etiqueta correcta
   const regex = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/g;
   const replacement = `<!-- HOROSCOPO_DIA_START -->\n<p class="horoscope-text">${nuevoTexto}</p>\n<!-- HOROSCOPO_DIA_END -->`;
 
@@ -63,19 +62,19 @@ async function actualizarArchivo(signo, nuevoTexto) {
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación segura de los 12 horóscopos...\n');
+  console.log('🌌 Iniciando actualización segura de los 12 horóscopos...\n');
   
   for (const signo of SIGNOS) {
     try {
       const texto = await generarHoroscopo(signo);
       await actualizarArchivo(signo, texto);
-      await new Promise(r => setTimeout(r, 900)); // pausa para evitar límites de API
+      await new Promise(r => setTimeout(r, 900));
     } catch (e) {
       console.error(`❌ Error con ${signo.nombre}:`, e.message);
     }
   }
   
-  console.log('\n🎉 Todos los horóscopos han sido actualizados sin romper el formato.');
+  console.log('\n🎉 Todos los horóscopos han sido actualizados.');
 }
 
 main().catch(console.error);
