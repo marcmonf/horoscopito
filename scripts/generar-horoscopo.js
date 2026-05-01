@@ -7,22 +7,22 @@ const anthropic = new Anthropic({
 });
 
 const SIGNOS = [
-  { nombre: 'Aries', file: 'aries.html' },
-  { nombre: 'Tauro', file: 'tauro.html' },
-  { nombre: 'Géminis', file: 'geminis.html' },
-  { nombre: 'Cáncer', file: 'cancer.html' },
-  { nombre: 'Leo', file: 'leo.html' },
-  { nombre: 'Virgo', file: 'virgo.html' },
-  { nombre: 'Libra', file: 'libra.html' },
-  { nombre: 'Escorpio', file: 'escorpio.html' },
+  { nombre: 'Aries',     file: 'aries.html' },
+  { nombre: 'Tauro',     file: 'tauro.html' },
+  { nombre: 'Géminis',   file: 'geminis.html' },
+  { nombre: 'Cáncer',    file: 'cancer.html' },
+  { nombre: 'Leo',       file: 'leo.html' },
+  { nombre: 'Virgo',     file: 'virgo.html' },
+  { nombre: 'Libra',     file: 'libra.html' },
+  { nombre: 'Escorpio',  file: 'escorpio.html' },
   { nombre: 'Sagitario', file: 'sagitario.html' },
   { nombre: 'Capricornio', file: 'capricornio.html' },
-  { nombre: 'Acuario', file: 'acuario.html' },
-  { nombre: 'Piscis', file: 'piscis.html' }
+  { nombre: 'Acuario',   file: 'acuario.html' },
+  { nombre: 'Piscis',    file: 'piscis.html' }
 ];
 
 async function generarHoroscopo(signo) {
-  console.log(`🔮 Generando horóscopo estilo Leo para ${signo.nombre}...`);
+  console.log(`🔮 Generando horóscopo para ${signo.nombre}...`);
 
   const response = await anthropic.messages.create({
     model: "claude-haiku-4-5",
@@ -30,14 +30,17 @@ async function generarHoroscopo(signo) {
     temperature: 0.65,
     messages: [{
       role: "user",
-      content: `Escribe el horóscopo de hoy para ${signo.nombre} exactamente en el mismo estilo elegante y suave que el ejemplo de Leo.
+      content: `Escribe el horóscopo de hoy para ${signo.nombre} exactamente en el mismo estilo elegante, suave y refinado que el ejemplo de Leo.
+
+Ejemplo de Leo:
+"El Sol, tu regente cósmico, te otorga hoy una presencia magnética que es imposible ignorar..."
 
 Reglas OBLIGATORIAS:
-- Usa exactamente el mismo tono poético pero natural del ejemplo de Leo.
+- Usa exactamente el mismo tono poético pero natural.
 - Escribe entre 380 y 480 palabras.
 - Párrafos cortos y bien espaciados.
 - Nunca uses emojis, markdown ni negritas.
-- El texto debe ir envuelto exactamente así: <p class="horoscope-text">...texto aquí con <br><br> entre párrafos...</p>
+- El texto debe ir envuelto exactamente así: <p class="horoscope-text">...texto con <br><br> entre párrafos...</p>
 - Mantén la misma elegancia y fluidez que Leo.`
     }]
   });
@@ -49,29 +52,30 @@ async function actualizarArchivo(signo, nuevoTexto) {
   const filePath = path.join(__dirname, '..', signo.file);
   let content = fs.readFileSync(filePath, 'utf8');
 
-  // ESTA ES LA LÍNEA MÁS IMPORTANTE: SIEMPRE PRESERVA EL FORMATO
-  const regex = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/;
-
+  // Reemplazo muy seguro: siempre mantiene la etiqueta <p class="horoscope-text">
+  const regex = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/g;
   const replacement = `<!-- HOROSCOPO_DIA_START -->\n<p class="horoscope-text">${nuevoTexto}</p>\n<!-- HOROSCOPO_DIA_END -->`;
 
   content = content.replace(regex, replacement);
-  
+
   fs.writeFileSync(filePath, content, 'utf8');
   console.log(`✅ Actualizado correctamente: ${signo.file}`);
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación segura (formato preservado)...\n');
+  console.log('🌌 Iniciando generación segura de los 12 horóscopos...\n');
+  
   for (const signo of SIGNOS) {
     try {
       const texto = await generarHoroscopo(signo);
       await actualizarArchivo(signo, texto);
-      await new Promise(r => setTimeout(r, 900));
+      await new Promise(r => setTimeout(r, 900)); // pausa para evitar límites de API
     } catch (e) {
       console.error(`❌ Error con ${signo.nombre}:`, e.message);
     }
   }
-  console.log('\n🎉 Todos los horóscopos actualizados sin romper formato.');
+  
+  console.log('\n🎉 Todos los horóscopos han sido actualizados sin romper el formato.');
 }
 
 main().catch(console.error);
