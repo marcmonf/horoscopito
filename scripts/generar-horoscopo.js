@@ -23,40 +23,43 @@ const REGENTES = {
 };
 
 const SIGNOS = [
-  { nombre: 'Aries',     file: 'aries.html' },
-  { nombre: 'Tauro',     file: 'tauro.html' },
-  { nombre: 'Géminis',   file: 'geminis.html' },
-  { nombre: 'Cáncer',    file: 'cancer.html' },
-  { nombre: 'Leo',       file: 'leo.html' },
-  { nombre: 'Virgo',     file: 'virgo.html' },
-  { nombre: 'Libra',     file: 'libra.html' },
-  { nombre: 'Escorpio',  file: 'escorpio.html' },
+  { nombre: 'Aries', file: 'aries.html' },
+  { nombre: 'Tauro', file: 'tauro.html' },
+  { nombre: 'Géminis', file: 'geminis.html' },
+  { nombre: 'Cáncer', file: 'cancer.html' },
+  { nombre: 'Leo', file: 'leo.html' },
+  { nombre: 'Virgo', file: 'virgo.html' },
+  { nombre: 'Libra', file: 'libra.html' },
+  { nombre: 'Escorpio', file: 'escorpio.html' },
   { nombre: 'Sagitario', file: 'sagitario.html' },
   { nombre: 'Capricornio', file: 'capricornio.html' },
-  { nombre: 'Acuario',   file: 'acuario.html' },
-  { nombre: 'Piscis',    file: 'piscis.html' }
+  { nombre: 'Acuario', file: 'acuario.html' },
+  { nombre: 'Piscis', file: 'piscis.html' }
 ];
 
-async function generarHoroscopo(signo) {
+async function generarContenido(signo) {
   const regente = REGENTES[signo.nombre];
-  console.log(`🔮 Generando horóscopo corto para ${signo.nombre}...`);
+  console.log(`🔮 Generando contenido completo para ${signo.nombre}...`);
 
   const response = await anthropic.messages.create({
     model: "claude-haiku-4-5",
-    max_tokens: 650,
+    max_tokens: 950,
     temperature: 0.68,
     messages: [{
       role: "user",
-      content: `Escribe el horóscopo de hoy para ${signo.nombre} en un estilo elegante, suave y refinado.
+      content: `Escribe el horóscopo de hoy para ${signo.nombre} de forma corta y elegante.
 
 Planeta regente: ${regente}
 
 Reglas OBLIGATORIAS:
-- Máximo 5-6 frases cortas (texto breve y fluido).
-- Tono poético pero natural, como el ejemplo de Leo.
-- Párrafos cortos y bien espaciados.
-- Nunca uses emojis, markdown ni negritas.
-- Devuelve SOLO el texto puro.`
+- Horóscopo principal: máximo 5-6 frases cortas.
+- Luego genera 4 cajitas cortas y coherentes con el horóscopo principal:
+  - Amor (2-3 frases)
+  - Trabajo (2-3 frases)
+  - Dinero (2-3 frases)
+  - Salud (2-3 frases)
+
+Mantén el mismo estilo suave y refinado que el ejemplo de Leo. Devuelve SOLO texto puro.`
     }]
   });
 
@@ -67,10 +70,12 @@ async function actualizarArchivo(signo, nuevoTexto) {
   const filePath = path.join(__dirname, '..', signo.file);
   let content = fs.readFileSync(filePath, 'utf8');
 
-  const regex = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/g;
-  const replacement = `<!-- HOROSCOPO_DIA_START -->\n<p class="horoscope-text">${nuevoTexto}</p>\n<!-- HOROSCOPO_DIA_END -->`;
+  // 1. Actualizar Horóscopo de hoy (no toca nada del formato)
+  const regexDia = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/g;
+  const replacementDia = `<!-- HOROSCOPO_DIA_START -->\n<p class="horoscope-text">${nuevoTexto}</p>\n<!-- HOROSCOPO_DIA_END -->`;
+  content = content.replace(regexDia, replacementDia);
 
-  content = content.replace(regex, replacement);
+  // TODO: Aquí añadiremos las cajitas en la siguiente iteración
 
   fs.writeFileSync(filePath, content, 'utf8');
   console.log(`✅ Actualizado correctamente: ${signo.file}`);
@@ -78,17 +83,17 @@ async function actualizarArchivo(signo, nuevoTexto) {
 
 async function main() {
   console.log('🌌 Iniciando generación de horóscopos cortos y coherentes...\n');
-  
+ 
   for (const signo of SIGNOS) {
     try {
-      const texto = await generarHoroscopo(signo);
+      const texto = await generarContenido(signo);
       await actualizarArchivo(signo, texto);
       await new Promise(r => setTimeout(r, 900));
     } catch (e) {
       console.error(`❌ Error con ${signo.nombre}:`, e.message);
     }
   }
-  
+ 
   console.log('\n🎉 Todos los horóscopos han sido actualizados (versión corta y coherente).');
 }
 
