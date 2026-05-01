@@ -42,7 +42,7 @@ async function generarContenido(signo) {
 
   const response = await anthropic.messages.create({
     model: "claude-haiku-4-5",
-    max_tokens: 1100,
+    max_tokens: 1200,
     temperature: 0.68,
     messages: [{
       role: "user",
@@ -52,28 +52,39 @@ Planeta regente: ${regente}
 
 Reglas OBLIGATORIAS:
 - Horóscopo principal: máximo 5-6 frases cortas.
-- Luego genera exactamente 4 cajitas cortas y coherentes:
+- Luego genera 4 cajitas cortas y coherentes:
   - Amor (2-3 frases)
   - Trabajo (2-3 frases)
   - Dinero (2-3 frases)
   - Salud (2-3 frases)
+- Al final, genera 4 puntuaciones coherentes (del 1 al 10) según el tono general:
+  - Amor: X/10
+  - Trabajo: X/10
+  - Dinero: X/10
+  - Salud: X/10
 
 Mantén el mismo estilo suave y refinado. Devuelve SOLO texto puro con este formato exacto:
 
 HOROSCOPO:
-[texto del horóscopo principal]
+[texto]
 
 AMOR:
-[texto de amor]
+[texto]
 
 TRABAJO:
-[texto de trabajo]
+[texto]
 
 DINERO:
-[texto de dinero]
+[texto]
 
 SALUD:
-[texto de salud]`
+[texto]
+
+PUNTUACIONES:
+Amor: X/10
+Trabajo: X/10
+Dinero: X/10
+Salud: X/10`
     }]
   });
 
@@ -84,22 +95,21 @@ async function actualizarArchivo(signo, nuevoTexto) {
   const filePath = path.join(__dirname, '..', signo.file);
   let content = fs.readFileSync(filePath, 'utf8');
 
-  // 1. Actualizar Horóscopo de hoy (seguro)
+  // 1. Horóscopo de hoy
   const regexDia = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/g;
   const replacementDia = `<!-- HOROSCOPO_DIA_START -->\n<p class="horoscope-text">${nuevoTexto}</p>\n<!-- HOROSCOPO_DIA_END -->`;
   content = content.replace(regexDia, replacementDia);
 
-  // 2. Actualizar las 4 cajitas (seguro, no rompe emojis ni estructura)
+  // 2. Cajitas
   const regexAmor = /<div class="area-title">Amor<\/div>\s*<div class="area-text">[\s\S]*?<\/div>/g;
   const regexTrabajo = /<div class="area-title">Trabajo<\/div>\s*<div class="area-text">[\s\S]*?<\/div>/g;
   const regexDinero = /<div class="area-title">Dinero<\/div>\s*<div class="area-text">[\s\S]*?<\/div>/g;
   const regexSalud = /<div class="area-title">Salud<\/div>\s*<div class="area-text">[\s\S]*?<\/div>/g;
 
-  // Parsear el texto de Claude
-  const amorMatch = nuevoTexto.match(/AMOR:\s*([\s\S]*?)(?=TRABAJO:|DINERO:|SALUD:|$)/i);
-  const trabajoMatch = nuevoTexto.match(/TRABAJO:\s*([\s\S]*?)(?=DINERO:|SALUD:|$)/i);
-  const dineroMatch = nuevoTexto.match(/DINERO:\s*([\s\S]*?)(?=SALUD:|$)/i);
-  const saludMatch = nuevoTexto.match(/SALUD:\s*([\s\S]*?)$/i);
+  const amorMatch = nuevoTexto.match(/AMOR:\s*([\s\S]*?)(?=TRABAJO:|DINERO:|SALUD:|PUNTUACIONES:|$)/i);
+  const trabajoMatch = nuevoTexto.match(/TRABAJO:\s*([\s\S]*?)(?=DINERO:|SALUD:|PUNTUACIONES:|$)/i);
+  const dineroMatch = nuevoTexto.match(/DINERO:\s*([\s\S]*?)(?=SALUD:|PUNTUACIONES:|$)/i);
+  const saludMatch = nuevoTexto.match(/SALUD:\s*([\s\S]*?)(?=PUNTUACIONES:|$)/i);
 
   if (amorMatch) content = content.replace(regexAmor, `<div class="area-title">Amor</div>\n<div class="area-text">${amorMatch[1].trim()}</div>`);
   if (trabajoMatch) content = content.replace(regexTrabajo, `<div class="area-title">Trabajo</div>\n<div class="area-text">${trabajoMatch[1].trim()}</div>`);
@@ -111,7 +121,7 @@ async function actualizarArchivo(signo, nuevoTexto) {
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación completa (horóscopo + 4 cajitas)...\n');
+  console.log('🌌 Iniciando generación completa (horóscopo + cajitas + energía del día)...\n');
  
   for (const signo of SIGNOS) {
     try {
@@ -123,7 +133,7 @@ async function main() {
     }
   }
  
-  console.log('\n🎉 Todos los horóscopos y cajitas han sido actualizados.');
+  console.log('\n🎉 Todo actualizado de forma coherente.');
 }
 
 main().catch(console.error);
