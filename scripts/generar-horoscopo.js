@@ -6,6 +6,22 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
+// Regentes correctos por signo (coherencia total)
+const REGENTES = {
+  'Aries': 'Marte',
+  'Tauro': 'Venus',
+  'Géminis': 'Mercurio',
+  'Cáncer': 'la Luna',
+  'Leo': 'el Sol',
+  'Virgo': 'Mercurio',
+  'Libra': 'Venus',
+  'Escorpio': 'Plutón',
+  'Sagitario': 'Júpiter',
+  'Capricornio': 'Saturno',
+  'Acuario': 'Urano',
+  'Piscis': 'Neptuno'
+};
+
 const SIGNOS = [
   { nombre: 'Aries',     file: 'aries.html' },
   { nombre: 'Tauro',     file: 'tauro.html' },
@@ -22,25 +38,25 @@ const SIGNOS = [
 ];
 
 async function generarHoroscopo(signo) {
-  console.log(`🔮 Generando horóscopo para ${signo.nombre}...`);
+  const regente = REGENTES[signo.nombre];
+  console.log(`🔮 Generando horóscopo corto para ${signo.nombre}...`);
 
   const response = await anthropic.messages.create({
     model: "claude-haiku-4-5",
-    max_tokens: 750,
-    temperature: 0.65,
+    max_tokens: 650,
+    temperature: 0.68,
     messages: [{
       role: "user",
-      content: `Escribe el horóscopo de hoy para ${signo.nombre} exactamente en el mismo estilo elegante y suave que el ejemplo de Leo.
+      content: `Escribe el horóscopo de hoy para ${signo.nombre} en un estilo elegante, suave y refinado.
 
-Ejemplo de Leo:
-"El Sol, tu regente cósmico, te otorga hoy una presencia magnética que es imposible ignorar..."
+Planeta regente: ${regente}
 
 Reglas OBLIGATORIAS:
-- Usa exactamente el mismo tono poético pero natural.
-- Escribe entre 380 y 480 palabras.
+- Máximo 5-6 frases cortas (texto breve y fluido).
+- Tono poético pero natural, como el ejemplo de Leo.
 - Párrafos cortos y bien espaciados.
 - Nunca uses emojis, markdown ni negritas.
-- Devuelve SOLO el texto puro (sin etiquetas HTML).`
+- Devuelve SOLO el texto puro.`
     }]
   });
 
@@ -51,7 +67,6 @@ async function actualizarArchivo(signo, nuevoTexto) {
   const filePath = path.join(__dirname, '..', signo.file);
   let content = fs.readFileSync(filePath, 'utf8');
 
-  // Reemplazo ULTRA SEGURO: siempre fuerza la etiqueta correcta
   const regex = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/g;
   const replacement = `<!-- HOROSCOPO_DIA_START -->\n<p class="horoscope-text">${nuevoTexto}</p>\n<!-- HOROSCOPO_DIA_END -->`;
 
@@ -62,7 +77,7 @@ async function actualizarArchivo(signo, nuevoTexto) {
 }
 
 async function main() {
-  console.log('🌌 Iniciando actualización segura de los 12 horóscopos...\n');
+  console.log('🌌 Iniciando generación de horóscopos cortos y coherentes...\n');
   
   for (const signo of SIGNOS) {
     try {
@@ -74,7 +89,7 @@ async function main() {
     }
   }
   
-  console.log('\n🎉 Todos los horóscopos han sido actualizados.');
+  console.log('\n🎉 Todos los horóscopos han sido actualizados (versión corta y coherente).');
 }
 
 main().catch(console.error);
