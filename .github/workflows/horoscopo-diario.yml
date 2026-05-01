@@ -3,7 +3,10 @@ name: Horóscopo Diario Automático
 on:
   schedule:
     - cron: '0 5 * * *'     # Cada día a las 5:00 UTC (6:00 España)
-  workflow_dispatch:        # Permite ejecutarlo manualmente
+  workflow_dispatch:
+
+permissions:
+  contents: write           # ←←← ESTO ES LO QUE FALTABA
 
 jobs:
   actualizar-horoscopo:
