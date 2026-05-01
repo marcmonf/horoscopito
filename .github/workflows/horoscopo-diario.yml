@@ -26,7 +26,44 @@ jobs:
       - name: Generar horóscopos con Claude
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/generar-horoscopo.jsname: Horóscopo Diario Automático
+
+on:
+  schedule:
+    - cron: '0 5 * * *'        # Todos los días a las 6:00 AM hora de España (5:00 UTC)
+  workflow_dispatch:           # Permite ejecutarlo manualmente
+
+jobs:
+  actualizar-horoscopo:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install @anthropic-ai/sdk
+
+      - name: Ejecutar script de horóscopos
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/generar-horoscopo.js
+
+      - name: Commit y push cambios
+        run: |
+          git config --global user.name "Horoscopito Bot"
+          git config --global user.email "bot@horoscopito.com"
+          git add -A
+          git commit -m "✨ Horóscopo actualizado - $(date '+%d/%m/%Y')" || echo "No hay cambios"
+          git push
 
       - name: Commit y push automático
         run: |
