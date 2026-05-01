@@ -21,34 +21,27 @@ const SIGNOS = [
   { nombre: 'Piscis',      archivo: 'piscis.html' }
 ];
 
-const fecha = new Date().toLocaleDateString('es-ES', { 
-  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-});
-
 async function generarHoroscopo(signo) {
-  console.log(`🔮 Generando horóscopo completo para ${signo.nombre}...`);
+  console.log(`🔮 Generando horóscopo (Haiku) para ${signo.nombre}...`);
 
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 1200,
-    temperature: 0.78,
+    model: "claude-3-haiku-20240307",   // Modelo barato y fiable
+    max_tokens: 900,
+    temperature: 0.75,
     messages: [{
       role: "user",
-      content: `Escribe un horóscopo diario premium y detallado para ${signo.nombre} hoy (${fecha}).
+      content: `Escribe un horóscopo diario premium y detallado para ${signo.nombre} hoy.
 
-**Requisitos obligatorios:**
-- Longitud total: entre 380 y 480 palabras (aprox 7-9 párrafos).
-- Tono: místico, poético, elegante, inspirador y con profundidad, pero natural.
-- Estructura clara:
-  1. Introducción potente (2-3 frases) que conecte con la energía del día.
-  2. Sección Amor
-  3. Sección Trabajo / Dinero
-  4. Sección Salud / Bienestar
-  5. Consejo final del cosmos (frase potente)
+Tono: místico, poético, elegante e inspirador.
+Estructura:
+- Introducción potente (2-3 frases)
+- Sección Amor
+- Sección Trabajo / Dinero
+- Sección Salud / Bienestar
+- Consejo final del cosmos
 
-Todo debe ser coherente: si en el horóscopo general hablas de precaución, las secciones de Amor/Trabajo no pueden contradecirlo.
-
-Devuelve SOLO el texto del horóscopo (sin títulos como "Amor:" o "Trabajo:"), listo para insertar directamente en la página.`
+Sé coherente entre todas las secciones. 
+Máximo 420 palabras. Devuelve SOLO el texto del horóscopo.`
     }]
   });
 
@@ -62,34 +55,29 @@ async function actualizarArchivo(signo, textoNuevo) {
   const inicio = '<!-- HOROSCOPO_DIA_START -->';
   const fin = '<!-- HOROSCOPO_DIA_END -->';
 
-  if (!contenido.includes(inicio) || !contenido.includes(fin)) {
-    console.error(`❌ No se encontraron marcadores en ${signo.archivo}`);
-    return;
-  }
-
   const nuevoContenido = contenido.replace(
     new RegExp(`${inicio}[\\s\\S]*?${fin}`),
     `${inicio}\n${textoNuevo}\n${fin}`
   );
 
   fs.writeFileSync(ruta, nuevoContenido, 'utf8');
-  console.log(`✅ Actualizado correctamente: ${signo.archivo}`);
+  console.log(`✅ Actualizado: ${signo.archivo}`);
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación de horóscopos diarios (versión mejorada)...\n');
+  console.log('🌌 Iniciando generación con Haiku...\n');
 
   for (const signo of SIGNOS) {
     try {
       const texto = await generarHoroscopo(signo);
       await actualizarArchivo(signo, texto);
-      await new Promise(r => setTimeout(r, 1200)); // pausa para no saturar API
+      await new Promise(r => setTimeout(r, 700));
     } catch (error) {
       console.error(`❌ Error con ${signo.nombre}:`, error.message);
     }
   }
 
-  console.log('\n🎉 Todos los horóscopos han sido actualizados.');
+  console.log('\n🎉 Proceso terminado.');
 }
 
 main().catch(console.error);
