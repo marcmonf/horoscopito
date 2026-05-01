@@ -22,26 +22,25 @@ const SIGNOS = [
 ];
 
 async function generarHoroscopo(signo) {
-  console.log(`🔮 Generando horóscopo para ${signo.nombre}...`);
+  console.log(`🔮 Generando horóscopo elegante para ${signo.nombre}...`);
 
   const response = await anthropic.messages.create({
-    model: "claude-haiku-4-5",          // ← Modelo actual y barato
-    max_tokens: 900,
-    temperature: 0.75,
+    model: "claude-haiku-4-5",
+    max_tokens: 650,
+    temperature: 0.68,
     messages: [{
       role: "user",
-      content: `Escribe un horóscopo diario premium y detallado para ${signo.nombre} hoy.
+      content: `Escribe un horóscopo diario para ${signo.nombre} hoy.
 
-Tono: místico, poético, elegante e inspirador.
-Estructura:
-- Introducción potente (2-3 frases)
-- Sección Amor
-- Sección Trabajo / Dinero
-- Sección Salud / Bienestar
-- Consejo final del cosmos
+Estilo exacto que quiero:
+- Texto elegante, poético pero suave y refinado.
+- Párrafos cortos y bien espaciados.
+- Sin emojis, sin markdown, sin # ni ##.
+- Sin títulos como "Amor:" o "Trabajo:".
+- Longitud moderada (aprox 5-7 párrafos cortos).
+- Tono místico, inspirador y natural.
 
-Sé coherente entre todas las secciones. Máximo 420 palabras.
-Devuelve SOLO el texto del horóscopo.`
+Devuelve SOLO el texto puro y limpio del horóscopo.`
     }]
   });
 
@@ -65,19 +64,19 @@ async function actualizarArchivo(signo, textoNuevo) {
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación de horóscopos diarios...\n');
+  console.log('🌌 Iniciando generación con estilo elegante y limpio...\n');
 
   for (const signo of SIGNOS) {
     try {
       const texto = await generarHoroscopo(signo);
       await actualizarArchivo(signo, texto);
-      await new Promise(r => setTimeout(r, 700));
+      await new Promise(r => setTimeout(r, 800));
     } catch (error) {
       console.error(`❌ Error con ${signo.nombre}:`, error.message);
     }
   }
 
-  console.log('\n🎉 Proceso terminado.');
+  console.log('\n🎉 Todos los horóscopos actualizados.');
 }
 
 main().catch(console.error);
