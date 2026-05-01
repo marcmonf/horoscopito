@@ -3,22 +3,22 @@ const fs = require('fs');
 const path = require('path');
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY
 });
 
 const SIGNOS = [
-  { nombre: 'Aries',       archivo: 'aries.html' },
-  { nombre: 'Tauro',       archivo: 'tauro.html' },
-  { nombre: 'Géminis',     archivo: 'geminis.html' },
-  { nombre: 'Cáncer',      archivo: 'cancer.html' },
-  { nombre: 'Leo',         archivo: 'leo.html' },
-  { nombre: 'Virgo',       archivo: 'virgo.html' },
-  { nombre: 'Libra',       archivo: 'libra.html' },
-  { nombre: 'Escorpio',    archivo: 'escorpio.html' },
-  { nombre: 'Sagitario',   archivo: 'sagitario.html' },
-  { nombre: 'Capricornio', archivo: 'capricornio.html' },
-  { nombre: 'Acuario',     archivo: 'acuario.html' },
-  { nombre: 'Piscis',      archivo: 'piscis.html' }
+  { nombre: 'Aries', file: 'aries.html' },
+  { nombre: 'Tauro', file: 'tauro.html' },
+  { nombre: 'Géminis', file: 'geminis.html' },
+  { nombre: 'Cáncer', file: 'cancer.html' },
+  { nombre: 'Leo', file: 'leo.html' },
+  { nombre: 'Virgo', file: 'virgo.html' },
+  { nombre: 'Libra', file: 'libra.html' },
+  { nombre: 'Escorpio', file: 'escorpio.html' },
+  { nombre: 'Sagitario', file: 'sagitario.html' },
+  { nombre: 'Capricornio', file: 'capricornio.html' },
+  { nombre: 'Acuario', file: 'acuario.html' },
+  { nombre: 'Piscis', file: 'piscis.html' }
 ];
 
 async function generarHoroscopo(signo) {
@@ -26,61 +26,52 @@ async function generarHoroscopo(signo) {
 
   const response = await anthropic.messages.create({
     model: "claude-haiku-4-5",
-    max_tokens: 700,
+    max_tokens: 750,
     temperature: 0.65,
     messages: [{
       role: "user",
-      content: `Escribe un horóscopo diario para ${signo.nombre} hoy.
+      content: `Escribe el horóscopo de hoy para ${signo.nombre} exactamente en el mismo estilo elegante y suave que el ejemplo de Leo.
 
-Quiero exactamente el mismo estilo suave y elegante que este ejemplo:
-
-"El Sol, tu regente cósmico, te otorga hoy una presencia magnética que es imposible ignorar. Entras en los espacios y la energía cambia: eso es Leo en su máximo esplendor. Hoy tienes la capacidad de inspirar, liderar y crear con una autenticidad que pocas personas pueden igualar. El reconocimiento que buscas llegará, pero el mayor regalo de hoy es la satisfacción que sientes cuando expresas tu yo más genuino sin filtros. La creatividad es tu superpoder: úsalo."
-
-Características que quiero:
-- Texto suave, elegante y refinado
-- Párrafos cortos y bien espaciados
-- Lenguaje poético pero natural
-- Sin emojis, sin markdown, sin negritas
-- Tono místico pero discreto
-- Longitud moderada (5-7 párrafos cortos)
-
-Devuelve SOLO el texto puro.`
+Reglas OBLIGATORIAS:
+- Usa exactamente el mismo tono poético pero natural del ejemplo de Leo.
+- Escribe entre 380 y 480 palabras.
+- Párrafos cortos y bien espaciados.
+- Nunca uses emojis, markdown ni negritas.
+- El texto debe ir envuelto exactamente así: <p class="horoscope-text">...texto aquí con <br><br> entre párrafos...</p>
+- Mantén la misma elegancia y fluidez que Leo.`
     }]
   });
 
   return response.content[0].text.trim();
 }
 
-async function actualizarArchivo(signo, textoNuevo) {
-  const ruta = path.join(__dirname, '..', signo.archivo);
-  let contenido = fs.readFileSync(ruta, 'utf8');
+async function actualizarArchivo(signo, nuevoTexto) {
+  const filePath = path.join(__dirname, '..', signo.file);
+  let content = fs.readFileSync(filePath, 'utf8');
 
-  const inicio = '<!-- HOROSCOPO_DIA_START -->';
-  const fin = '<!-- HOROSCOPO_DIA_END -->';
+  // ESTA ES LA LÍNEA MÁS IMPORTANTE: SIEMPRE PRESERVA EL FORMATO
+  const regex = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/;
 
-  const nuevoContenido = contenido.replace(
-    new RegExp(`${inicio}[\\s\\S]*?${fin}`),
-    `${inicio}\n${textoNuevo}\n${fin}`
-  );
+  const replacement = `<!-- HOROSCOPO_DIA_START -->\n<p class="horoscope-text">${nuevoTexto}</p>\n<!-- HOROSCOPO_DIA_END -->`;
 
-  fs.writeFileSync(ruta, nuevoContenido, 'utf8');
-  console.log(`✅ Actualizado: ${signo.archivo}`);
+  content = content.replace(regex, replacement);
+  
+  fs.writeFileSync(filePath, content, 'utf8');
+  console.log(`✅ Actualizado correctamente: ${signo.file}`);
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación con estilo elegante (como Leo)...\n');
-
+  console.log('🌌 Iniciando generación segura (formato preservado)...\n');
   for (const signo of SIGNOS) {
     try {
       const texto = await generarHoroscopo(signo);
       await actualizarArchivo(signo, texto);
-      await new Promise(r => setTimeout(r, 800));
-    } catch (error) {
-      console.error(`❌ Error con ${signo.nombre}:`, error.message);
+      await new Promise(r => setTimeout(r, 900));
+    } catch (e) {
+      console.error(`❌ Error con ${signo.nombre}:`, e.message);
     }
   }
-
-  console.log('\n🎉 Todos los horóscopos actualizados.');
+  console.log('\n🎉 Todos los horóscopos actualizados sin romper formato.');
 }
 
 main().catch(console.error);
