@@ -22,25 +22,29 @@ const SIGNOS = [
 ];
 
 async function generarHoroscopo(signo) {
-  console.log(`🔮 Generando horóscopo elegante para ${signo.nombre}...`);
+  console.log(`🔮 Generando horóscopo estilo Leo para ${signo.nombre}...`);
 
   const response = await anthropic.messages.create({
     model: "claude-haiku-4-5",
-    max_tokens: 650,
-    temperature: 0.68,
+    max_tokens: 700,
+    temperature: 0.65,
     messages: [{
       role: "user",
       content: `Escribe un horóscopo diario para ${signo.nombre} hoy.
 
-Estilo exacto que quiero:
-- Texto elegante, poético pero suave y refinado.
-- Párrafos cortos y bien espaciados.
-- Sin emojis, sin markdown, sin # ni ##.
-- Sin títulos como "Amor:" o "Trabajo:".
-- Longitud moderada (aprox 5-7 párrafos cortos).
-- Tono místico, inspirador y natural.
+Quiero exactamente el mismo estilo suave y elegante que este ejemplo:
 
-Devuelve SOLO el texto puro y limpio del horóscopo.`
+"El Sol, tu regente cósmico, te otorga hoy una presencia magnética que es imposible ignorar. Entras en los espacios y la energía cambia: eso es Leo en su máximo esplendor. Hoy tienes la capacidad de inspirar, liderar y crear con una autenticidad que pocas personas pueden igualar. El reconocimiento que buscas llegará, pero el mayor regalo de hoy es la satisfacción que sientes cuando expresas tu yo más genuino sin filtros. La creatividad es tu superpoder: úsalo."
+
+Características que quiero:
+- Texto suave, elegante y refinado
+- Párrafos cortos y bien espaciados
+- Lenguaje poético pero natural
+- Sin emojis, sin markdown, sin negritas
+- Tono místico pero discreto
+- Longitud moderada (5-7 párrafos cortos)
+
+Devuelve SOLO el texto puro.`
     }]
   });
 
@@ -64,7 +68,7 @@ async function actualizarArchivo(signo, textoNuevo) {
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación con estilo elegante y limpio...\n');
+  console.log('🌌 Iniciando generación con estilo elegante (como Leo)...\n');
 
   for (const signo of SIGNOS) {
     try {
