@@ -22,10 +22,10 @@ const SIGNOS = [
 ];
 
 async function generarHoroscopo(signo) {
-  console.log(`🔮 Generando horóscopo (Haiku) para ${signo.nombre}...`);
+  console.log(`🔮 Generando horóscopo para ${signo.nombre}...`);
 
   const response = await anthropic.messages.create({
-    model: "claude-3-haiku-20240307",   // Modelo barato y fiable
+    model: "claude-haiku-4-5",          // ← Modelo actual y barato
     max_tokens: 900,
     temperature: 0.75,
     messages: [{
@@ -40,8 +40,8 @@ Estructura:
 - Sección Salud / Bienestar
 - Consejo final del cosmos
 
-Sé coherente entre todas las secciones. 
-Máximo 420 palabras. Devuelve SOLO el texto del horóscopo.`
+Sé coherente entre todas las secciones. Máximo 420 palabras.
+Devuelve SOLO el texto del horóscopo.`
     }]
   });
 
@@ -65,7 +65,7 @@ async function actualizarArchivo(signo, textoNuevo) {
 }
 
 async function main() {
-  console.log('🌌 Iniciando generación con Haiku...\n');
+  console.log('🌌 Iniciando generación de horóscopos diarios...\n');
 
   for (const signo of SIGNOS) {
     try {
