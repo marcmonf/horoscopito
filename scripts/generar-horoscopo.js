@@ -57,7 +57,7 @@ Reglas OBLIGATORIAS:
   - Trabajo (2-3 frases)
   - Dinero (2-3 frases)
   - Salud (2-3 frases)
-- Al final genera 4 puntuaciones coherentes (1-10) según el tono del texto:
+- Al final genera 4 puntuaciones coherentes (1-10) según el tono general:
   - Amor: X/10
   - Trabajo: X/10
   - Dinero: X/10
@@ -95,12 +95,12 @@ async function actualizarArchivo(signo, nuevoTexto) {
   const filePath = path.join(__dirname, '..', signo.file);
   let content = fs.readFileSync(filePath, 'utf8');
 
-  // 1. Horóscopo de hoy
+  // 1. Horóscopo de hoy (seguro)
   const regexDia = /<!-- HOROSCOPO_DIA_START -->[\s\S]*?<!-- HOROSCOPO_DIA_END -->/g;
   const replacementDia = `<!-- HOROSCOPO_DIA_START -->\n<p class="horoscope-text">${nuevoTexto}</p>\n<!-- HOROSCOPO_DIA_END -->`;
   content = content.replace(regexDia, replacementDia);
 
-  // 2. Cajitas
+  // 2. Cajitas (seguro)
   const regexAmor = /<div class="area-title">Amor<\/div>\s*<div class="area-text">[\s\S]*?<\/div>/g;
   const regexTrabajo = /<div class="area-title">Trabajo<\/div>\s*<div class="area-text">[\s\S]*?<\/div>/g;
   const regexDinero = /<div class="area-title">Dinero<\/div>\s*<div class="area-text">[\s\S]*?<\/div>/g;
@@ -116,16 +116,28 @@ async function actualizarArchivo(signo, nuevoTexto) {
   if (dineroMatch) content = content.replace(regexDinero, `<div class="area-title">Dinero</div>\n<div class="area-text">${dineroMatch[1].trim()}</div>`);
   if (saludMatch) content = content.replace(regexSalud, `<div class="area-title">Salud</div>\n<div class="area-text">${saludMatch[1].trim()}</div>`);
 
-  // 3. Barras de energía (coherentes)
+  // 3. Barras de energía (actualiza cada una específicamente)
   const amorP = nuevoTexto.match(/Amor:\s*(\d+)\/10/i);
   const trabajoP = nuevoTexto.match(/Trabajo:\s*(\d+)\/10/i);
   const dineroP = nuevoTexto.match(/Dinero:\s*(\d+)\/10/i);
   const saludP = nuevoTexto.match(/Salud:\s*(\d+)\/10/i);
 
-  if (amorP) content = content.replace(/data-width="[^"]*"/, `data-width="${amorP[1]}0%"`);
-  if (trabajoP) content = content.replace(/data-width="[^"]*"/, `data-width="${trabajoP[1]}0%"`);
-  if (dineroP) content = content.replace(/data-width="[^"]*"/, `data-width="${dineroP[1]}0%"`);
-  if (saludP) content = content.replace(/data-width="[^"]*"/, `data-width="${saludP[1]}0%"`);
+  if (amorP) {
+    content = content.replace(/<span class="rating-label">Amor<\/span>[\s\S]*?data-width="[^"]*"/, `<span class="rating-label">Amor</span>\n<div class="rating-bar"><div class="rating-fill" data-width="${amorP[1]}0%"></div></div>`);
+    content = content.replace(/<span class="rating-label">Amor<\/span>[\s\S]*?<span class="rating-val">[^<]*<\/span>/, `<span class="rating-label">Amor</span>\n<div class="rating-bar"><div class="rating-fill" data-width="${amorP[1]}0%"></div></div>\n<span class="rating-val">${amorP[1]}/10</span>`);
+  }
+  if (trabajoP) {
+    content = content.replace(/<span class="rating-label">Trabajo<\/span>[\s\S]*?data-width="[^"]*"/, `<span class="rating-label">Trabajo</span>\n<div class="rating-bar"><div class="rating-fill" data-width="${trabajoP[1]}0%"></div></div>`);
+    content = content.replace(/<span class="rating-label">Trabajo<\/span>[\s\S]*?<span class="rating-val">[^<]*<\/span>/, `<span class="rating-label">Trabajo</span>\n<div class="rating-bar"><div class="rating-fill" data-width="${trabajoP[1]}0%"></div></div>\n<span class="rating-val">${trabajoP[1]}/10</span>`);
+  }
+  if (dineroP) {
+    content = content.replace(/<span class="rating-label">Dinero<\/span>[\s\S]*?data-width="[^"]*"/, `<span class="rating-label">Dinero</span>\n<div class="rating-bar"><div class="rating-fill" data-width="${dineroP[1]}0%"></div></div>`);
+    content = content.replace(/<span class="rating-label">Dinero<\/span>[\s\S]*?<span class="rating-val">[^<]*<\/span>/, `<span class="rating-label">Dinero</span>\n<div class="rating-bar"><div class="rating-fill" data-width="${dineroP[1]}0%"></div></div>\n<span class="rating-val">${dineroP[1]}/10</span>`);
+  }
+  if (saludP) {
+    content = content.replace(/<span class="rating-label">Salud<\/span>[\s\S]*?data-width="[^"]*"/, `<span class="rating-label">Salud</span>\n<div class="rating-bar"><div class="rating-fill" data-width="${saludP[1]}0%"></div></div>`);
+    content = content.replace(/<span class="rating-label">Salud<\/span>[\s\S]*?<span class="rating-val">[^<]*<\/span>/, `<span class="rating-label">Salud</span>\n<div class="rating-bar"><div class="rating-fill" data-width="${saludP[1]}0%"></div></div>\n<span class="rating-val">${saludP[1]}/10</span>`);
+  }
 
   fs.writeFileSync(filePath, content, 'utf8');
   console.log(`✅ Actualizado completamente: ${signo.file}`);
